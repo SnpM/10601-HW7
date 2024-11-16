@@ -1,0 +1,2 @@
+Final Train Loss: 6.423404
+Final Valid Loss: 6.381335

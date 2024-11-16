@@ -89,11 +89,21 @@ class TestRNN(unittest.TestCase):
         output, hidden = rnn(input)
         output = my_rnn.out(output)  # Use same projection as our RNN
 
-        self.assertEqual(my_hidden_states.shape, hidden.shape, "Hidden states shape mismatch")
-        self.assertEqual(my_output_states.shape, output.shape, "Output states shape mismatch")
+        self.assertEqual(
+            my_hidden_states.shape, hidden.shape, "Hidden states shape mismatch"
+        )
+        self.assertEqual(
+            my_output_states.shape, output.shape, "Output states shape mismatch"
+        )
 
-        self.assertTrue(torch.allclose(my_hidden_states, hidden, atol=1e-5), "Hidden states are not close")
-        self.assertTrue(torch.allclose(my_output_states, output, atol=1e-5), "Output states are not close")
+        self.assertTrue(
+            torch.allclose(my_hidden_states, hidden, atol=1e-5),
+            "Hidden states are not close",
+        )
+        self.assertTrue(
+            torch.allclose(my_output_states, output, atol=1e-5),
+            "Output states are not close",
+        )
 
     def test_attention1(self):
         print("Testing SelfAttention Test Case 1...", end="")
@@ -170,7 +180,41 @@ class TestRNN(unittest.TestCase):
         attn_output, _ = attention(query, key, value)
         attn_output = attn_output.squeeze(0)
 
-        self.assertTrue(torch.allclose(my_output_state, attn_output, atol=1e-5), "Outputs are not close")
+        self.assertTrue(
+            torch.allclose(my_output_state, attn_output, atol=1e-5),
+            "Outputs are not close",
+        )
+
+
+class TestTrain(unittest.TestCase):
+    def test_train(self):
+        # rnn.py --train_data {tiny_train_stories} --val_data {tiny_valid_stories} --embed_dim 64 --hidden_dim 128 --train_losses_out train_loss.txt --val_losses_out valid_loss.txt --metrics_out metrics.txt --dk 32 --dv 32 --num_sequences 128 --batch_size 1
+
+        tiny_train_stories = "data/tiny_train_stories.json"
+        tiny_valid_stories = "data/tiny_valid_stories.json"
+
+        full_train_stories = "data/HW7_large_stories/train_stories.json"
+        full_valid_stories = "data/HW7_large_stories/valid_stories.json"
+        args_dict = {
+            "train_data": tiny_train_stories,
+            "val_data": tiny_valid_stories,
+            "embed_dim": 64,
+            "hidden_dim": 128,
+            "train_losses_out": "train_loss.txt",
+            "val_losses_out": "valid_loss.txt",
+            "metrics_out": "metrics.txt",
+            "dk": 32,
+            "dv": 32,
+            "num_sequences": 128,
+            "batch_size": 1,
+        }
+        from collections import namedtuple
+
+        Args = namedtuple("Args", args_dict)
+        args = Args(**args_dict)
+        import rnn
+
+        rnn.main(args)
 
 
 if __name__ == "__main__":
