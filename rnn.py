@@ -464,10 +464,10 @@ def train(
         # Shape to (batch_size * t, vocab_size)
         vocab_size = token_logits.size(-1)
         input = token_logits.permute(0, 2, 1).contiguous()
-        input = input.view(-1, vocab_size)
+        input = input[:, :, :-1]
 
         # Shape to (batch_size * t)
-        target = sequence.view(-1)
+        target = sequence[:, 1:,]
 
         loss = loss_fn(input, target)
 
@@ -572,16 +572,14 @@ def complete(prefix: str, num_tokens=64, temperature=0.0):
     return tokenizer.decode(output)
 
 
-device = (
-    "cuda"
-    if torch.cuda.is_available()
-    else "mps" if torch.backends.mps.is_available() else "cpu"
-)
-
-
 def main(args):
+    global lm, tokenizer, device
     # Initialize torch device to use cuda if we have a gpu
-
+    device = (
+        "cuda"
+        if torch.cuda.is_available()
+        else "mps" if torch.backends.mps.is_available() else "cpu"
+    )
     print(f"Using device: {device}")
 
     # Load tokenizer
@@ -652,7 +650,7 @@ def main(args):
     print("Final Valid Loss: ", valid_loss[-1])
 
     # Saves your trained model weights(Please comment when submitting to gradescope)
-    # torch.save(lm, "model.pt")
+    torch.save(lm, "model.pt")
 
     # You can later load back in your model in a separate Python file by running:
     # >>> from rnn import *
